@@ -1,106 +1,120 @@
-/* ===============================
-   SAVE CLIENT (SAVE PAGE)
+/************************************
+ XYLO TRADE – TARGET TRACKER
+ Admin + Client Logic (localStorage)
+************************************/
+
+/* ================================
+   ACCOUNT TARGET CONFIG
 ================================ */
+const ACCOUNT_TARGETS = {
+  raw_office_500: {
+    title: "Office Expense Target ($500)",
+    targetAmount: 500,
+    rebate: 18,
+    lotsRequired: 100
+  },
+  raw_office_1750: {
+    title: "Office Setup Target ($1750)",
+    targetAmount: 1750,
+    rebate: 18,
+    lotsRequired: 300
+  },
+  raw_marketing_1000: {
+    title: "Marketing Expense Target ($1000)",
+    targetAmount: 1000,
+    rebate: 18,
+    lotsRequired: 200
+  }
+};
 
+/* ================================
+   SAVE CLIENT (ADMIN)
+================================ */
 function saveClient() {
-  const cid = document.getElementById("cid").value.trim();
-  const account = document.getElementById("account").value;
-  const deposit = parseFloat(document.getElementById("deposit").value);
-  const lots = parseFloat(document.getElementById("lots").value || 0);
+  const cid = document.getElementById("cid")?.value.trim();
+  const account = document.getElementById("account")?.value;
+  const deposit = document.getElementById("deposit")?.value;
+  const lots = document.getElementById("lots")?.value;
 
-  if (!cid || !account || !deposit) {
-    alert("Please fill all required fields");
+  if (!cid || !account || !deposit || !lots) {
+    alert("❌ Please fill all fields");
     return;
   }
 
   const clientData = {
-    cid: cid,
     account: account,
-    deposit: deposit,
-    lots: lots,
-    createdAt: new Date().toISOString()
+    deposit: Number(deposit),
+    lots: Number(lots)
   };
 
   localStorage.setItem("xylo_" + cid, JSON.stringify(clientData));
-  alert("Client saved successfully");
+  alert("✅ Client saved successfully");
 }
 
-/* ===============================
+/* ================================
    LOAD CLIENT (CLIENT PAGE)
 ================================ */
-
 function loadClient() {
-  const cid = document.getElementById("cid").value.trim();
+  const cid = document.getElementById("cid")?.value.trim();
+  const resultBox = document.getElementById("result");
 
   if (!cid) {
-    document.getElementById("result").innerHTML = "❌ Please enter CID";
+    alert("❌ Enter Client ID");
     return;
   }
 
   const data = localStorage.getItem("xylo_" + cid);
 
   if (!data) {
-    document.getElementById("result").innerHTML = "❌ Client not found";
+    resultBox.innerHTML = "<p style='color:red;'>❌ Client not found</p>";
     return;
   }
 
-  const c = JSON.parse(data);
-  const target = getTarget(c.account, c.deposit);
+  const client = JSON.parse(data);
+  const target = ACCOUNT_TARGETS[client.account];
 
   if (!target) {
-    document.getElementById("result").innerHTML = "❌ No target found for this deposit";
+    resultBox.innerHTML = "<p style='color:red;'>❌ Invalid account type</p>";
     return;
   }
 
-  document.getElementById("result").innerHTML = `
-    <h3>Client ID: ${c.cid}</h3>
-    <p><b>Account Type:</b> ${c.account}</p>
-    <p><b>Deposit:</b> $${c.deposit}</p>
-    <p><b>Lots Completed:</b> ${c.lots}</p>
-    <hr>
-    <p><b>Target Amount:</b> $${target.target}</p>
-    <p><b>Lots Required:</b> ${target.lots}</p>
-    <p><b>Reward:</b> ${target.reward}</p>
+  const completedLots = client.lots;
+  const remainingLots = Math.max(0, target.lotsRequired - completedLots);
+  const reward = Math.min(completedLots, target.lotsRequired) * target.rebate;
+  const progress = Math.min(
+    (completedLots / target.lotsRequired) * 100,
+    100
+  ).toFixed(1);
+
+  resultBox.innerHTML = `
+    <h3>${target.title}</h3>
+    <p><strong>Target Amount:</strong> $${target.targetAmount}</p>
+    <p><strong>Lots Required:</strong> ${target.lotsRequired}</p>
+    <p><strong>Lots Completed:</strong> ${completedLots}</p>
+    <p><strong>Remaining Lots:</strong> ${remainingLots}</p>
+    <p><strong>Rebate per Lot:</strong> $${target.rebate}</p>
+    <h4>🎁 Reward Earned: $${reward}</h4>
+    <div style="background:#ddd;border-radius:20px;overflow:hidden;">
+      <div style="width:${progress}%;background:#0f9d58;color:#fff;padding:5px;text-align:center;">
+        ${progress}%
+      </div>
+    </div>
   `;
 }
 
-/* ===============================
-   TARGET LOGIC
+/* ================================
+   DELETE CLIENT (ADMIN)
 ================================ */
-
-function getTarget(acc, dep) {
-
-  /* STANDARD ACCOUNT */
-  if (acc === "STANDARD") {
-    if (dep >= 20000) return { target: 20000, lots: 50, reward: "$1200" };
-    if (dep >= 15000) return { target: 15000, lots: 40, reward: "$1000" };
-    if (dep >= 10000) return { target: 10000, lots: 25, reward: "$700" };
-    if (dep >= 5000)  return { target: 5000,  lots: 15, reward: "$300" };
-    if (dep >= 2000)  return { target: 2000,  lots: 5,  reward: "$100" };
-  }
-
-  /* RAW ACCOUNT */
-  if (acc === "RAW") {
-    if (dep >= 1750) return { target: 1750, lots: 300, reward: "$18 / Lot" };
-    if (dep >= 1000) return { target: 1000, lots: 200, reward: "$18 / Lot" };
-    if (dep >= 500)  return { target: 500,  lots: 100, reward: "$18 / Lot" };
-  }
-
-  return null;
-}
-
-/* ===============================
-   DELETE CLIENT (OPTIONAL)
-================================ */
-
 function deleteClient() {
-  const cid = document.getElementById("cid").value.trim();
+  const cid = document.getElementById("cid")?.value.trim();
 
   if (!cid) {
-    alert("Enter CID first");
+    alert("❌ Enter Client ID");
     return;
   }
 
-  localStorage.removeItem("xylo_" + cid);
-  document.getElementById("result").innerHTML = "🗑 Client deleted";
+  if (confirm("⚠️ Are you sure you want to delete this client?")) {
+    localStorage.removeItem("xylo_" + cid);
+    alert("🗑 Client deleted successfully");
+  }
 }
