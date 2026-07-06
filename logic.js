@@ -1,36 +1,40 @@
-// ===== XYLO TRADE TRACKER =====
+// SAVE CLIENT (ADMIN)
+function saveClient() {
+  const cid = document.getElementById("cid").value;
+  const acc = document.getElementById("acc").value;
+  const dep = document.getElementById("dep").value;
+  const lots = document.getElementById("lots").value;
 
-// SAVE DATA (ADMIN)
-function saveData() {
-  const data = {
-    accountType: document.getElementById("accountType").value,
-    targetName: document.getElementById("targetName").value,
-    targetAmount: document.getElementById("targetAmount").value,
-    lotsCompleted: document.getElementById("lotsCompleted").value,
-    totalLots: document.getElementById("totalLots").value,
-    reward: document.getElementById("reward").value,
-    updated: new Date().toLocaleString()
+  if (!cid) {
+    alert("Client ID required");
+    return;
+  }
+
+  const clientData = {
+    account: acc,
+    deposit: dep,
+    lots: lots
   };
 
-  localStorage.setItem("xyloData", JSON.stringify(data));
-  alert("Data Saved Successfully ✅");
+  localStorage.setItem("xylo_" + cid, JSON.stringify(clientData));
+  alert("Client saved successfully");
 }
 
-// LOAD DATA (CLIENT)
-function loadData() {
-  const data = JSON.parse(localStorage.getItem("xyloData"));
-  if (!data) return;
+// LOAD CLIENT (CLIENT PAGE)
+function loadClient() {
+  const cid = document.getElementById("cid").value;
+  const data = localStorage.getItem("xylo_" + cid);
 
-  document.getElementById("c_account").innerText = data.accountType;
-  document.getElementById("c_target").innerText = data.targetName + " ($" + data.targetAmount + ")";
-  document.getElementById("c_lots").innerText = data.lotsCompleted + " / " + data.totalLots;
+  if (!data) {
+    document.getElementById("result").innerHTML = "❌ Client not found";
+    return;
+  }
 
-  const progress = (data.lotsCompleted / data.totalLots) * 100;
-  document.getElementById("progressBar").style.width = progress + "%";
-  document.getElementById("progressText").innerText = progress.toFixed(1) + "% Completed";
+  const c = JSON.parse(data);
 
-  document.getElementById("c_reward").innerText = "$" + data.reward;
-  document.getElementById("c_update").innerText = data.updated;
+  document.getElementById("result").innerHTML = `
+    <h3>Account Type: ${c.account}</h3>
+    <p>Deposit: $${c.deposit}</p>
+    <p>Lots Completed: ${c.lots}</p>
+  `;
 }
-
-document.addEventListener("DOMContentLoaded", loadData);
