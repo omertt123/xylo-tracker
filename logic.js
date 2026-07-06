@@ -1,120 +1,93 @@
-/************************************
- XYLO TRADE – TARGET TRACKER
- Admin + Client Logic (localStorage)
-************************************/
+/* ==============================
+   XYLO TRADE – CLIENT TRACKER
+   ============================== */
 
-/* ================================
-   ACCOUNT TARGET CONFIG
-================================ */
-const ACCOUNT_TARGETS = {
-  raw_office_500: {
-    title: "Office Expense Target ($500)",
-    targetAmount: 500,
-    rebate: 18,
-    lotsRequired: 100
-  },
-  raw_office_1750: {
-    title: "Office Setup Target ($1750)",
-    targetAmount: 1750,
-    rebate: 18,
-    lotsRequired: 300
-  },
-  raw_marketing_1000: {
-    title: "Marketing Expense Target ($1000)",
-    targetAmount: 1000,
-    rebate: 18,
-    lotsRequired: 200
-  }
-};
-
-/* ================================
-   SAVE CLIENT (ADMIN)
-================================ */
+/* ---------- SAVE CLIENT (ADMIN) ---------- */
 function saveClient() {
-  const cid = document.getElementById("cid")?.value.trim();
-  const account = document.getElementById("account")?.value;
-  const deposit = document.getElementById("deposit")?.value;
-  const lots = document.getElementById("lots")?.value;
+  const cid = document.getElementById("cid").value.trim();
+  const acc = document.getElementById("acc").value;
+  const dep = Number(document.getElementById("dep").value);
+  const lots = Number(document.getElementById("lots").value);
 
-  if (!cid || !account || !deposit || !lots) {
-    alert("❌ Please fill all fields");
+  if (!cid || !dep || !lots) {
+    alert("Please fill all fields");
     return;
   }
 
+  const target = getTarget(acc, dep);
+
   const clientData = {
-    account: account,
-    deposit: Number(deposit),
-    lots: Number(lots)
+    cid: cid,
+    account: acc,
+    deposit: dep,
+    lots: lots,
+    target: target
   };
 
   localStorage.setItem("xylo_" + cid, JSON.stringify(clientData));
-  alert("✅ Client saved successfully");
+  alert("Client saved successfully ✅");
 }
 
-/* ================================
-   LOAD CLIENT (CLIENT PAGE)
-================================ */
+/* ---------- LOAD CLIENT (CLIENT PAGE) ---------- */
 function loadClient() {
-  const cid = document.getElementById("cid")?.value.trim();
-  const resultBox = document.getElementById("result");
-
-  if (!cid) {
-    alert("❌ Enter Client ID");
-    return;
-  }
-
+  const cid = document.getElementById("cid").value.trim();
   const data = localStorage.getItem("xylo_" + cid);
 
   if (!data) {
-    resultBox.innerHTML = "<p style='color:red;'>❌ Client not found</p>";
+    document.getElementById("result").innerHTML =
+      "❌ Client not found";
     return;
   }
 
-  const client = JSON.parse(data);
-  const target = ACCOUNT_TARGETS[client.account];
+  const c = JSON.parse(data);
 
-  if (!target) {
-    resultBox.innerHTML = "<p style='color:red;'>❌ Invalid account type</p>";
-    return;
-  }
-
-  const completedLots = client.lots;
-  const remainingLots = Math.max(0, target.lotsRequired - completedLots);
-  const reward = Math.min(completedLots, target.lotsRequired) * target.rebate;
-  const progress = Math.min(
-    (completedLots / target.lotsRequired) * 100,
-    100
-  ).toFixed(1);
-
-  resultBox.innerHTML = `
-    <h3>${target.title}</h3>
-    <p><strong>Target Amount:</strong> $${target.targetAmount}</p>
-    <p><strong>Lots Required:</strong> ${target.lotsRequired}</p>
-    <p><strong>Lots Completed:</strong> ${completedLots}</p>
-    <p><strong>Remaining Lots:</strong> ${remainingLots}</p>
-    <p><strong>Rebate per Lot:</strong> $${target.rebate}</p>
-    <h4>🎁 Reward Earned: $${reward}</h4>
-    <div style="background:#ddd;border-radius:20px;overflow:hidden;">
-      <div style="width:${progress}%;background:#0f9d58;color:#fff;padding:5px;text-align:center;">
-        ${progress}%
-      </div>
-    </div>
+  let html = `
+    <h3>Account Type: ${c.account}</h3>
+    <p><b>Deposit:</b> $${c.deposit}</p>
+    <p><b>Lots Completed:</b> ${c.lots}</p>
   `;
+
+  if (c.target) {
+    html += `
+      <hr>
+      <p><b>Target Amount:</b> $${c.target.target}</p>
+      <p><b>Required Lots:</b> ${c.target.lots}</p>
+      <p><b>Reward:</b> ${c.target.reward}</p>
+    `;
+  } else {
+    html += `<p>No target achieved yet</p>`;
+  }
+
+  html += `<br><button onclick="deleteClient('${cid}')">❌ Delete Client</button>`;
+
+  document.getElementById("result").innerHTML = html;
 }
 
-/* ================================
-   DELETE CLIENT (ADMIN)
-================================ */
-function deleteClient() {
-  const cid = document.getElementById("cid")?.value.trim();
+/* ---------- DELETE CLIENT ---------- */
+function deleteClient(cid) {
+  localStorage.removeItem("xylo_" + cid);
+  document.getElementById("result").innerHTML =
+    "Client deleted ✅";
+}
 
-  if (!cid) {
-    alert("❌ Enter Client ID");
-    return;
+/* ---------- TARGET LOGIC ---------- */
+function getTarget(acc, dep) {
+
+  /* STANDARD ACCOUNT */
+  if (acc === "STANDARD") {
+    if (dep >= 20000) return { target: 20000, lots: 50, reward: "$1200 + $400 (Approval)" };
+    if (dep >= 15000) return { target: 15000, lots: 40, reward: "$1000 + $300 (Approval)" };
+    if (dep >= 10000) return { target: 10000, lots: 25, reward: "$700 + $150 (Approval)" };
+    if (dep >= 5000)  return { target: 5000,  lots: 15, reward: "$300 + $100 (Approval)" };
+    if (dep >= 2000)  return { target: 2000,  lots: 5,  reward: "$100 + $50 (Approval)" };
   }
 
-  if (confirm("⚠️ Are you sure you want to delete this client?")) {
-    localStorage.removeItem("xylo_" + cid);
-    alert("🗑 Client deleted successfully");
+  /* RAW ACCOUNT */
+  if (acc === "RAW") {
+    if (dep >= 1750) return { target: 1750, lots: 300, reward: "$18 per lot" };
+    if (dep >= 1000) return { target: 1000, lots: 200, reward: "$18 per lot" };
+    if (dep >= 500)  return { target: 500,  lots: 100, reward: "$18 per lot" };
   }
+
+  return null;
 }
