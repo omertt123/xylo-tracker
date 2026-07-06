@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Xylo Admin</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+<div class="container">
+<header>
+  <img src="xylo-logo.png">
+  <h1>XYLO TRADE – ADMIN PANEL</h1>
+</header>
+
+<div class="card">
+<label>Client ID</label>
+<input id="cid">
+
+<label>Account Type</label>
+<select id="acc">
+  <option value="STANDARD">Standard</option>
+  <option value="RAW">Raw</option>
+</select>
+
+<label>Deposit ($)</label>
+<input id="dep">
+
+<label>Lots Completed</label>
+<input id="lots">
+
+<button onclick="saveClient()">SAVE CLIENT</button>
+</div>
+</div>
+
+<script src="logic.js"></script>
+</body>
+</html>
