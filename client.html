@@ -1,25 +1,21 @@
 <!DOCTYPE html>
 <html>
 <head>
-  <title>Xylo Client Dashboard</title>
-  <link rel="stylesheet" href="style.css">
+  <title>XYLO Client Tracker</title>
 </head>
+
 <body>
-<div class="container">
-<header>
-  <img src="xylo-logo.png">
-  <h1>XYLO TRADE – CLIENT DASHBOARD</h1>
-</header>
 
-<div class="card">
-<label>Enter Client ID</label>
-<input id="clientId">
-<button onclick="loadClient()">CHECK STATUS</button>
-</div>
+  <h2>Client Progress</h2>
 
-<div id="result" class="card"></div>
-</div>
+  <!-- REQUIRED HTML START -->
+  <input id="cid" placeholder="Enter Client ID">
+  <button onclick="loadClient()">Check Progress</button>
 
-<script src="logic.js"></script>
+  <div id="result"></div>
+  <!-- REQUIRED HTML END -->
+
+  <script src="logic.js"></script>
+
 </body>
 </html>
