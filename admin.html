@@ -1,31 +1,14 @@
 <!DOCTYPE html>
 <html>
-<head>
-  <title>XYLO Admin Panel</title>
-</head>
-
 <body>
 
-  <h2>Admin – Add / Update Client</h2>
+<h2>Admin</h2>
 
-  <!-- REQUIRED HTML START -->
-  <input id="cid" placeholder="Client ID">
+<input id="cid" placeholder="CID">
+<input id="deposit" placeholder="Deposit">
 
-  <select id="account">
-    <option value="">Select Account</option>
-    <option value="Standard">Standard</option>
-    <option value="Raw">Raw</option>
-  </select>
+<button onclick="saveClient()">Save</button>
 
-  <input id="deposit" type="number" placeholder="Deposit">
-  <input id="lots" type="number" placeholder="Lots">
-
-  <br><br>
-
-  <button onclick="saveClient()">Save Client</button>
-  <!-- REQUIRED HTML END -->
-
-  <script src="logic.js"></script>
-
+<script src="logic.js"></script>
 </body>
 </html>
