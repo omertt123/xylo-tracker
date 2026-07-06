@@ -1,53 +1,36 @@
-let db = JSON.parse(localStorage.getItem("xyloDB")) || {};
+// ===== XYLO TRADE TRACKER =====
 
-function saveClient() {
-  const id = cid.value;
-  db[id] = {
-    account: acc.value,
-    deposit: +dep.value,
-    lots: +lots.value
+// SAVE DATA (ADMIN)
+function saveData() {
+  const data = {
+    accountType: document.getElementById("accountType").value,
+    targetName: document.getElementById("targetName").value,
+    targetAmount: document.getElementById("targetAmount").value,
+    lotsCompleted: document.getElementById("lotsCompleted").value,
+    totalLots: document.getElementById("totalLots").value,
+    reward: document.getElementById("reward").value,
+    updated: new Date().toLocaleString()
   };
-  localStorage.setItem("xyloDB", JSON.stringify(db));
-  alert("Client Updated Successfully");
+
+  localStorage.setItem("xyloData", JSON.stringify(data));
+  alert("Data Saved Successfully ✅");
 }
 
-function loadClient() {
-  const id = clientId.value;
-  const c = db[id];
-  if (!c) return result.innerHTML = "❌ Client Not Found";
+// LOAD DATA (CLIENT)
+function loadData() {
+  const data = JSON.parse(localStorage.getItem("xyloData"));
+  if (!data) return;
 
-  let targetLots = 0, reward = "";
+  document.getElementById("c_account").innerText = data.accountType;
+  document.getElementById("c_target").innerText = data.targetName + " ($" + data.targetAmount + ")";
+  document.getElementById("c_lots").innerText = data.lotsCompleted + " / " + data.totalLots;
 
-  if (c.account === "STANDARD") {
-    if (c.deposit >= 20000) targetLots = 50, reward = "$1200 Cash";
-    else if (c.deposit >= 15000) targetLots = 40, reward = "$1000 Cash";
-    else if (c.deposit >= 10000) targetLots = 25, reward = "$700 Cash";
-    else if (c.deposit >= 5000) targetLots = 15, reward = "$300 Cash";
-    else targetLots = 5, reward = "$100 Cash";
-  }
+  const progress = (data.lotsCompleted / data.totalLots) * 100;
+  document.getElementById("progressBar").style.width = progress + "%";
+  document.getElementById("progressText").innerText = progress.toFixed(1) + "% Completed";
 
-  if (c.account === "RAW") {
-    if (c.lots >= 300) targetLots = 300, reward = "$1750 Office Setup";
-    else if (c.lots >= 200) targetLots = 200, reward = "$1000 Marketing";
-    else targetLots = 100, reward = "$500 Office Expense";
-  }
-
-  let progress = Math.min((c.lots / targetLots) * 100, 100);
-
-  result.innerHTML = `
-  <div class="card">
-    <h2>${c.account} ACCOUNT</h2>
-    <p><b>Deposit:</b> $${c.deposit}</p>
-    <p><b>Lots Completed:</b> ${c.lots} / ${targetLots}</p>
-
-    <div class="progress-box">
-      <div class="progress">
-        <div class="progress-bar" style="width:${progress}%"></div>
-      </div>
-    </div>
-
-    <p><b>Reward:</b> ${reward}</p>
-    <span class="badge">${progress >= 100 ? "REWARD UNLOCKED" : "IN PROGRESS"}</span>
-  </div>
-  `;
+  document.getElementById("c_reward").innerText = "$" + data.reward;
+  document.getElementById("c_update").innerText = data.updated;
 }
+
+document.addEventListener("DOMContentLoaded", loadData);
