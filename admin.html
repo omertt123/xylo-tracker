@@ -1,36 +1,31 @@
 <!DOCTYPE html>
 <html>
 <head>
-  <title>Xylo Admin</title>
-  <link rel="stylesheet" href="style.css">
+  <title>XYLO Admin Panel</title>
 </head>
+
 <body>
-<div class="container">
-<header>
-  <img src="xylo-logo.png">
-  <h1>XYLO TRADE – ADMIN PANEL</h1>
-</header>
 
-<div class="card">
-<label>Client ID</label>
-<input id="cid">
+  <h2>Admin – Add / Update Client</h2>
 
-<label>Account Type</label>
-<select id="acc">
-  <option value="STANDARD">Standard</option>
-  <option value="RAW">Raw</option>
-</select>
+  <!-- REQUIRED HTML START -->
+  <input id="cid" placeholder="Client ID">
 
-<label>Deposit ($)</label>
-<input id="dep">
+  <select id="account">
+    <option value="">Select Account</option>
+    <option value="Standard">Standard</option>
+    <option value="Raw">Raw</option>
+  </select>
 
-<label>Lots Completed</label>
-<input id="lots">
+  <input id="deposit" type="number" placeholder="Deposit">
+  <input id="lots" type="number" placeholder="Lots">
 
-<button onclick="saveClient()">SAVE CLIENT</button>
-</div>
-</div>
+  <br><br>
 
-<script src="logic.js"></script>
+  <button onclick="saveClient()">Save Client</button>
+  <!-- REQUIRED HTML END -->
+
+  <script src="logic.js"></script>
+
 </body>
 </html>
